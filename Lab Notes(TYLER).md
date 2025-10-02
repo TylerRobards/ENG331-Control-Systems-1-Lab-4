@@ -6,6 +6,7 @@ tags:
 ---
 
 # Linearised Model
+These values have ben changed to meet the requriements for 5.
 1) Controller
 $G(s)=\dfrac{s^2+0.0401s+4e^{-6}}{s^2+0.0001s}$
 2) Pump
@@ -24,5 +25,7 @@ $h_{1,0}=$
 $h_{2,0}=$
 4) Feedback
 5) 
+If $h_{2,0}=10cm$ then $h_{1,0}=15cm$
 6) Plots
+#NOTE i shifted the step response to happen at 50s to make the plots easier to read.
 
