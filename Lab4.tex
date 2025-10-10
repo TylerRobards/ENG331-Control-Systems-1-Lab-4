@@ -1,0 +1,223 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath, amssymb} % Math Packages
+\usepackage{geometry}
+\usepackage[hidelinks]{hyperref} % Clickable links
+\usepackage{graphicx, float} % Image Packages
+\graphicspath{{/home/tyler/Pictures/}} % Path to image folder
+\geometry{margin=2cm}
+\setlength{\parindent}{0pt} % No indentation
+\usepackage[none]{hyphenat} % Disable Hypens splitting words across lines
+\usepackage{minted}
+
+\begin{document}
+\begin{center}
+\textbf{\LARGE ENG331\\[6pt]
+Control Systems 1}\\[10pt]
+\textbf{\large Lab Task 4 - Simulation Lab\\[4pt]
+Baley Eccles - 652137, Matthew Hocking - 659747,\\ Tyler Robards - 651790}\\
+\end{center}
+
+\section*{Part 1: Modelling}
+The following sections use PIDF parameters,
+$$K_p=1,\:K_i=0.04,\:K_d=0.25,\:T_f=10^4$$
+These parameters are not well tuned to the system. Lab 3 had issues with the testing rig used, where some section of the PCB was damaged or missing. This resulted in a lot of noise from the pressure sensors. This means the system was tuned to perform as well as possible in an environment with large amounts of noise and now in the linearised system this has not been modelled as we modelled the ideal system. This means the system performs poorly in further analysis.
+\subsection*{Nonlinear Model}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{563891983_1105836421293280_8976003833920598196_n.png}
+	\caption{Step response for input $r(t)=0.01u(t)+0.1\:m$ and disturbance $d(t)=0.1u(t-50)$ and noise $n(t)=\eta(t)u(t-100)$}
+	\label{fig:nonlinear}
+\end{figure}
+It can be seen in Figure \ref{fig:nonlinear} that the system achieves steady-state that is very far from the expected step result. The disturbance then makes this much worse. When the noise is applied the system responds very poorly likely due to bad system tuning in Lab 3.
+\subsection*{Linear Model}
+The full MATLAB script can be seen in \nameref{sec:appendix}\\
+\textbf{Steady-State Height of $\mathbf{h_1}$ if $\mathbf{h_2=10}\text{cm}$}\\
+The steady state height of tank 1 if tank 2 is at 10cm can be seen in the MATLAB script. The result is,
+$$h_1=15\:\text{cm},\:\text{if}\:h_2=10\:\text{cm}$$
+\textbf{Plot Step Response}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\columnwidth]{ENG331_Lab4_Step.jpg}
+	\caption{Step response for step in $h_2$ of $1\:\text{cm}$}
+\end{figure}
+\section*{Part 2: Analysis}
+ 
+\begin{enumerate}
+	\item [1.] Disturbance Model
+		\begin{enumerate}
+			\item [a.] Theoretically predict steady state error for tuned PIDF to a disturbance step.\\
+				For a step disturbance in a type-1 system the steady state error is,
+				$$e_{ss}(\infty)=\text{lim}_{s\rightarrow 0}\:sE(s)=D_0G_2(s)S(0)$$
+			As the PIDF includes an integral term the steady-state error should theoretically be $e_{ss}(\infty)=0$.
+				\hfill
+			\item [b.] Plot step response to a step disturbance.
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{eng331_lab4_linear_disturbance.jpg}
+					\caption{Disturbance Step Response}
+				\end{figure}
+				\hfill
+			\item [c.] Is this a good model of the disturbance\\
+				The linear disturbance model on partially matches the nonlinear systems behaviour. Both response show the tank level will recover after a step disturbance, however the linearised model predicts much faster recovery and more oscillation, whilst the nonlinear system settles slower and more smoothly. This shows that the system has likely been tuned poorly as the linearised model doesn't account for any non-linearities in the system.
+				\hfill
+		\end{enumerate}
+	\item [2.] Robustness
+		\begin{enumerate}
+			\item [a.] Plot the root locus of the system with tuned controller
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{cp_xpgd0.jpg}
+					\caption{Root Locus of Tuned System}
+				\end{figure}
+				i.)
+The dominant closed-loop poles at the tuned operating point are relatively insensitive to moderate changes in loop gain, they shift only slightly along short, local branches of the root locus,  however, because those poles lie very close to the imaginary axis even small absolute movements can noticeably increase settling time or reduce damping; therefore, while gain variation alone won't drastically relocate the poles, the system is slow and has limited stability margin, and performance/robustness will be better improved by redesigning the controller or placing the dominant poles further left rather than relying solely on gain adjustments.
+				\hfill
+			\item [b.] Nyquist diagram of the system with tuned controller at the tuned operating point
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{LSXSacNt.jpg}
+					\caption{Nyquist Diagram at operating point $h_1=15\text{cm}$}
+				\end{figure}
+				$$\text{Gain Margin}=\infty\:dB\:at\:NaN\:rad/s$$
+				$$\text{Phase Margin}=89.02\:deg\:at\:0.00\:rad/s$$
+				\hfill
+			\item [c.] Nyquist diagram of the system with tuned controller at a significantly different operating point
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{0q__EKqv.jpg}
+					\caption{Nyquist Diagram at operating point $h_1=20\text{cm}$}
+				\end{figure}
+				$$\text{Gain Margin}=\infty\:dB\:at\:NaN\:rad/s$$
+				$$\text{Phase Margin}=88.01\:deg\:at\:0.00\:rad/s$$
+				\hfill
+			\item [d.] Comment on control robustness\\
+				The Nyquist plots show that the loop transfer at both operating points does not encircle the critical point $-1$, so the closed-loop system remains stable with the current controller. However, the Nyquist locus passes very close to the imaginary axis/near-zero real axis and remains only a modest distance from $-1$ , particularly at the higher operating point $(h_1=20\text{cm})$, where the curve shifts slightly and comes closer to the critical point. This indicates only moderate gain and phase margins: the controller is robust to small gain/phase perturbations, but margins are limited and further gain increases or unmodelled phase lag could push the loop toward instability.
+				\hfill
+		\end{enumerate}
+	\item [3.] Sensitivity
+		\begin{enumerate}
+			\item [a.] Gang of four transfer functions for the tuned system
+				$$G_1(s) = \frac{8.75\times10^{-7}s^2 + 3.5\times10^{-6}s + 1.4\times10^{-7}}{0.001591s^2 + 5.438\times10^{-5}s + 1.4\times10^{-7}}$$
+				$$G_2(s) = \frac{0.00159s^2 + 5.088\times10^{-5}s}{0.001591s^2 + 5.438\times10^{-5}s + 1.4\times10^{-7}}$$
+				\hfill
+			\item [b.] Step and frequency response of the sensitivity function as bode plots
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{MEqQ5L0R.jpg}
+					\caption{Step Response of $T(s)$ and $S(s)$}
+				\end{figure}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=0.9\columnwidth]{phHGJkjl.jpg}
+					\caption{Frequency Response Bode Plots of $T(s)$ and $S(s)$}
+				\end{figure}
+				\hfill
+			\item [c.] Closed-loop system behaviour observations\\
+The closed-loop system is stable and well-damped, with smooth step responses and no overshoot. $T(s)$  rises to $1$ and $S(s)$ falls to $0$, confirming $T(s)+S(s)=1$. The response is very slow (in the order of $10^3\rightarrow 10^4\:s$), indicating low bandwidth and slow dynamics. In the frequency domain, the system tracks well and rejects disturbances at low frequencies $(S(s)\approx -30\:dB)$, while high-frequency noise is strongly suppressed  $(S(s)\approx -60\:dB)$. The phase response shows no risk of instability. Overall, the system prioritises accuracy and robustness over speed.
+				\hfill
+		\end{enumerate}
+\end{enumerate}
+
+\newpage
+\section*{Appendix A: Linear Model MATLAB Script}
+\phantomsection
+\label{sec:appendix}
+\begin{minted}[frame=lines, fontsize=\small, linenos]{matlab}
+% 1. Controller
+K_p=1;
+K_i=0; % recorded 0.04
+K_d=0; % recorded 0.25
+T_f=0; % recorded 10^4
+
+G_controller = pid(K_p,K_i,K_d,T_f);
+tf(G_controller)
+
+% 2. Pump
+K_pump = 0.0000035;
+G_pump = zpk([],[],K_pump);
+tf(G_pump)
+
+% 3. Tank Models (this uses the values from lab 3)
+g = 9.81;
+A_1 = 1.59e-3;
+A_01 = 1.96e-5; 
+A_2 = 1.59e-3;
+A_02 = 1.263-5; 
+C_d1 = 0.662;
+C_d2 = 0.708;
+h_10 = 15e-2;
+h_20 = 7e-2;
+
+G_1=tf([1/A_1],[1 (A_01*C_d1*sqrt(2*g))/(A_1*2*sqrt(h_10))]);
+tf(G_1)
+G_2=tf([1/A_2],[1 (A_02*C_d2*sqrt(2*g))/(A_2*2*sqrt(h_20))]);
+tf(G_2)
+
+% 4. Feedback System
+T=feedback((G_controller*G_pump*G_1*G_2),1);
+tf(T)
+
+% 5. Calculate tank 1 height if tank 2 is at 20cm
+g = 9.81;
+A_1 = 1.59e-3;
+A_01 = 1.96e-5; 
+A_2 = 1.59e-3;
+A_02 = 1.263e-5; 
+C_d1 = 0.662;
+C_d2 = 0.708;
+
+h_20 = 0.10;
+
+% Steady-state flows and h1
+Qo2 = A_02*C_d2*sqrt(2*g*h_20);
+Qo1 = Qo2;
+h10 = (Qo1/(A_01*C_d1))^2/(2*g);
+
+G_1=tf([1/A_1],[1 (A_01*C_d1*sqrt(2*g))/(A_1*2*sqrt(h_10))]);
+tf(G_1)
+G_2=tf([1/A_2],[1 (A_02*C_d2*sqrt(2*g))/(A_2*2*sqrt(h_20))]);
+tf(G_2)
+T=feedback((G_controller*G_pump*G_1*G_2),1);
+tf(T) % Feedback system with this operating point
+fprintf('h_{1,0} = %.5f m (%.2f cm)\n', h_10, 100*h_10);
+
+% 6. Step Resopnse
+S=1-T;
+G_vp_over_r=minreal(G_controller*S); % Controller Output
+
+% sim over 0.001 m step
+tEnd = 300;
+dt = 0.1;
+t = 0:dt:tEnd;
+
+% --- delayed step reference: 0.01 m starting at 50 s
+u = zeros(size(t));
+u(t >= 50) = 0.01;         % step starts at 50s
+
+% --- system responses
+[y,~] = lsim(T, u, t);                % delta h2 response
+uVp    = lsim(G_controller*(1-T), u, t);         % delta Vp = C*S*u, with S = 1-T
+
+
+% plot step resonse
+figure;
+subplot(2,1,1);
+plot(t,y,'LineWidth',1.2);
+grid on;
+ylim([-0.005 0.025]); 
+ylabel('\delta h_2 (m)');
+title('Closed loop resonse to 1 cm step in tank 2 height')
+
+subplot(2,1,2)
+plot(t,u,"LineWidth",1.2);
+ylim([-0.01 0.02]); 
+grid on;
+ylabel('\delta V_p (V)');
+xlabel('Time (s)')
+\end{minted}
+\vfill
+\hrule
+\begin{center}
+\textit{End of Assignment}
+\end{center}
+\end{document}
